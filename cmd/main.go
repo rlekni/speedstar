@@ -45,6 +45,27 @@ func runScheduler() {
 	// each job has a unique id
 	fmt.Println(j.ID())
 
+	_, _ = s.NewJob(
+		gocron.CronJob(
+			// standard cron tab parsing
+			"1 * * * *",
+			false,
+		),
+		gocron.NewTask(
+			func() {},
+		),
+	)
+	_, _ = s.NewJob(
+		gocron.CronJob(
+			// optionally include seconds as the first field
+			"* 1 * * * *",
+			true,
+		),
+		gocron.NewTask(
+			func() {},
+		),
+	)
+
 	// start the scheduler
 	s.Start()
 
