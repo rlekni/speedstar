@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/go-co-op/gocron/v2"
 	"github.com/showwin/speedtest-go/speedtest"
+
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 )
 
 func main() {
@@ -13,6 +16,39 @@ func main() {
 
 	for {
 		time.Sleep(1000)
+	}
+}
+
+func influxdbWrites() {
+	// Create a new client using an InfluxDB server base URL and an authentication token
+	client := influxdb2.NewClient("http://localhost:8086", "my-token")
+	// Ensures background processes finishes
+	defer client.Close()
+	// Use blocking write client for writes to desired bucket
+	writeAPI := client.WriteAPIBlocking("my-org", "my-bucket")
+
+	// Create point using full params constructor
+	p := influxdb2.NewPoint("stat",
+		map[string]string{"unit": "temperature"},
+		map[string]interface{}{"avg": 24.5, "max": 45.0},
+		time.Now())
+	// write point immediately
+	writeAPI.WritePoint(context.Background(), p)
+	// Create point using fluent style
+	p = influxdb2.NewPointWithMeasurement("stat").
+		AddTag("unit", "temperature").
+		AddField("avg", 23.2).
+		AddField("max", 45.0).
+		SetTime(time.Now())
+	err := writeAPI.WritePoint(context.Background(), p)
+	if err != nil {
+		panic(err)
+	}
+	// Or write directly line protocol
+	line := fmt.Sprintf("stat,unit=temperature avg=%f,max=%f", 23.5, 45.0)
+	err = writeAPI.WriteRecord(context.Background(), line)
+	if err != nil {
+		panic(err)
 	}
 }
 
