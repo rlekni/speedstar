@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"os"
 	"time"
 
@@ -10,6 +11,8 @@ import (
 	"github.com/showwin/speedtest-go/speedtest"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
+
+	_ "github.com/joho/godotenv/autoload"
 )
 
 func main() {
@@ -28,6 +31,7 @@ var (
 )
 
 func influxdbWrites() {
+	fmt.Printf("INFLUXDB_ORG: %s\n", dbOrg)
 	// Create a new client using an InfluxDB server base URL and an authentication token
 	client := influxdb2.NewClient(dbUrl, dbToken)
 	// Ensures background processes finishes
@@ -60,6 +64,40 @@ func influxdbWrites() {
 	}
 }
 
+func influxdbWritesAsync() {
+	fmt.Printf("INFLUXDB_ORG: %s\n", dbOrg)
+	// Create a new client using an InfluxDB server base URL and an authentication token
+	client := influxdb2.NewClientWithOptions(dbUrl, dbToken, influxdb2.DefaultOptions().SetBatchSize(20))
+	// Ensures background processes finishes
+	defer client.Close()
+	// Get non-blocking write client
+	writeAPI := client.WriteAPI(dbOrg, dbBucket)
+	// write some points
+	for i := 0; i < 100; i++ {
+		// create point
+		p := influxdb2.NewPoint(
+			"system",
+			map[string]string{
+				"id":       fmt.Sprintf("rack_%v", i%10),
+				"vendor":   "AWS",
+				"hostname": fmt.Sprintf("host_%v", i%100),
+			},
+			map[string]interface{}{
+				"temperature": rand.Float64() * 80.0,
+				"disk_free":   rand.Float64() * 1000.0,
+				"disk_total":  (i/10 + 1) * 1000000,
+				"mem_total":   (i/100 + 1) * 10000000,
+				"mem_free":    rand.Uint64(),
+			},
+			time.Now())
+		// write asynchronously
+		writeAPI.WritePoint(p)
+	}
+
+	// Force all unwritten data to be sent
+	writeAPI.Flush()
+}
+
 func runScheduler() {
 	// create a scheduler
 	s, err := gocron.NewScheduler()
@@ -77,6 +115,8 @@ func runScheduler() {
 		gocron.NewTask(
 			func(a string, b int) {
 				// do things
+				influxdbWrites()
+				influxdbWritesAsync()
 				fmt.Println("JOB RUN")
 			},
 			"hello",
