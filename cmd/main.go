@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/go-co-op/gocron/v2"
@@ -19,13 +20,20 @@ func main() {
 	}
 }
 
+var (
+	dbUrl    = os.Getenv("INFLUXDB_URL")
+	dbToken  = os.Getenv("INFLUXDB_TOKEN")
+	dbOrg    = os.Getenv("INFLUXDB_ORG")
+	dbBucket = os.Getenv("INFLUXDB_BUCKET")
+)
+
 func influxdbWrites() {
 	// Create a new client using an InfluxDB server base URL and an authentication token
-	client := influxdb2.NewClient("http://localhost:8086", "my-token")
+	client := influxdb2.NewClient(dbUrl, dbToken)
 	// Ensures background processes finishes
 	defer client.Close()
 	// Use blocking write client for writes to desired bucket
-	writeAPI := client.WriteAPIBlocking("my-org", "my-bucket")
+	writeAPI := client.WriteAPIBlocking(dbOrg, dbBucket)
 
 	// Create point using full params constructor
 	p := influxdb2.NewPoint("stat",
