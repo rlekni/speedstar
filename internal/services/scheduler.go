@@ -38,7 +38,11 @@ func (scheduler SpeedTestScheduler) RunScheduler() {
 			false,
 		),
 		gocron.NewTask(
-			func() {}, // speed test
+			func() {
+				// Create new service/clients every run
+				var service = NewSpeedtestService()
+				service.RunSpeedtest()
+			},
 		),
 	)
 	if err != nil {
