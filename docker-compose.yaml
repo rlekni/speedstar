@@ -17,6 +17,16 @@ services:
       - 8087:8086
     networks:
       - influxdb
+  speedstar:
+    build: .
+    container_name: speedstar
+    hostname: speedstar
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=
+      - INFLUXDB_ORG=influxdb
+      - INFLUXDB_BUCKET=speedstar
+      - SCHEDULE_CRON="0 * * * *"
 
 volumes:
   influxdb_data: {}
