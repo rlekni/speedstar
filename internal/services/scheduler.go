@@ -8,6 +8,12 @@ import (
 	"time"
 
 	"github.com/go-co-op/gocron/v2"
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
+)
+
+var (
+	dbUrl   = os.Getenv("INFLUXDB_URL")
+	dbToken = os.Getenv("INFLUXDB_TOKEN")
 )
 
 type ISpeedtestScheduler interface {
@@ -40,7 +46,13 @@ func (scheduler SpeedtestScheduler) RunScheduler() {
 		gocron.NewTask(
 			func() {
 				// Create new service/clients every run
-				var service = NewSpeedtestService()
+				log.Printf("Connecting to: %s\n", dbUrl)
+				dbClient := influxdb2.NewClient(dbUrl, dbToken)
+				// Ensures background processes finishes
+				defer dbClient.Close()
+
+				repository := db.NewSpeedtestRepository(dbClient)
+				var service = NewSpeedtestService(repository)
 				service.RunSpeedtest()
 			},
 		),

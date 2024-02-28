@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"speedstar/internal/types"
 	"time"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 )
-
-type ISpeedtestRepository interface {
-}
 
 var (
 	dbUrl    = os.Getenv("INFLUXDB_URL")
@@ -19,6 +17,37 @@ var (
 	dbOrg    = os.Getenv("INFLUXDB_ORG")
 	dbBucket = os.Getenv("INFLUXDB_BUCKET")
 )
+
+type ISpeedtestRepository interface {
+	SaveSpeedtestResults(types.SpeedtestResult)
+}
+
+type SpeedtestRepository struct {
+	client influxdb2.Client
+}
+
+func NewSpeedtestRepository(client influxdb2.Client) ISpeedtestRepository {
+	return &SpeedtestRepository{
+		client: client,
+	}
+}
+
+func (repo SpeedtestRepository) SaveSpeedtestResults(result types.SpeedtestResult) {
+	// Get non-blocking write client
+	writeAPI := repo.client.WriteAPI(dbOrg, dbBucket)
+	// Create point using fluent style
+	point := influxdb2.NewPointWithMeasurement("stat").
+		AddTag("unit", "temperature").
+		AddField("avg", 23.2).
+		AddField("max", 45.0).
+		SetTime(time.Now())
+
+	// write asynchronously
+	writeAPI.WritePoint(point)
+
+	// Force all unwritten data to be sent
+	writeAPI.Flush()
+}
 
 func InfluxdbWrites() {
 	fmt.Printf("INFLUXDB_ORG: %s\n", dbOrg)
