@@ -49,7 +49,7 @@ func (service SpeedtestService) RunSpeedtest() {
 			Longitude: server.Lon,
 			Distance:  server.Distance,
 			Latency:   server.Latency.Milliseconds(),
-			Jitter:    server.Jitter.Microseconds(),
+			Jitter:    server.Jitter.Milliseconds(),
 			Download:  server.DLSpeed,
 			Upload:    server.ULSpeed,
 		}
