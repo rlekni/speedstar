@@ -1,10 +1,22 @@
-FROM golang:1.22-alpine
+FROM golang:1.22-alpine AS builder
 
-# pre-copy/cache go.mod for pre-downloading dependencies and only redownloading them in subsequent builds if they change
-COPY go.mod go.sum ./
-RUN go mod download && go mod verify
+ARG PROJECT_VERSION
 
-COPY . .
-RUN go build -v -o /cmd ./...
+COPY . /src/
+WORKDIR /src
+RUN set -Eeux && \
+    go mod download && \
+    go mod verify
 
-CMD ["app"]
+RUN GOOS=linux GOARCH=amd64 \
+    go build \
+    -trimpath \
+    -ldflags="-w -s -X 'main.Version=${PROJECT_VERSION}'" \
+    -o app cmd/main.go
+RUN go test -cover -v ./...
+
+FROM scratch
+WORKDIR /root/
+COPY --from=builder /src/app .
+
+ENTRYPOINT ["./app"]
