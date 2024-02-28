@@ -26,11 +26,20 @@ func NewSpeedtestService(repo db.ISpeedtestRepository) ISpeedtestService {
 }
 
 func (service SpeedtestService) RunSpeedtest() {
-	user, _ := service.client.FetchUserInfo()
+	user, err := service.client.FetchUserInfo()
+	if err != nil {
+		log.Println(err)
+	}
 	log.Printf("ISP %s\n", user.Isp)
 
-	serverList, _ := service.client.FetchServers()
-	targets, _ := serverList.FindServer([]int{})
+	serverList, err := service.client.FetchServers()
+	if err != nil {
+		log.Println(err)
+	}
+	targets, err := serverList.FindServer([]int{})
+	if err != nil {
+		log.Println(err)
+	}
 	for _, server := range targets {
 		log.Printf("Server: %s", server.Name)
 		// Please make sure your host can access this test server,

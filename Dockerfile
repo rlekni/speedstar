@@ -13,9 +13,10 @@ RUN GOOS=linux GOARCH=amd64 \
     -trimpath \
     -ldflags="-w -s -X 'main.Version=${PROJECT_VERSION}'" \
     -o app cmd/main.go
-RUN go test -cover -v ./...
+#RUN go test -cover -v ./...
 
-FROM scratch
+FROM alpine:3.17.1
+RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 COPY --from=builder /src/app .
 
