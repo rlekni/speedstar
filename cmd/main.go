@@ -8,7 +8,8 @@ import (
 )
 
 func main() {
-	go services.RunScheduler()
+	scheduler := services.NewScheduler()
+	go scheduler.RunScheduler()
 
 	// Block main thread from completing
 	for {

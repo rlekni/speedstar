@@ -2,11 +2,53 @@ package services
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"speedstar/internal/db"
 	"time"
 
 	"github.com/go-co-op/gocron/v2"
 )
+
+type ISpeedTestScheduler interface {
+	RunScheduler()
+}
+
+type SpeedTestScheduler struct {
+	scheduler gocron.Scheduler
+}
+
+func NewScheduler() ISpeedTestScheduler {
+	scheduler, err := gocron.NewScheduler()
+	if err != nil {
+		log.Println(err)
+	}
+	return &SpeedTestScheduler{
+		scheduler: scheduler,
+	}
+}
+
+func (scheduler SpeedTestScheduler) RunScheduler() {
+	cronTab := os.Getenv("SCHEDULE_CRON")
+	log.Printf("Cron: %s\n", cronTab)
+	cronJob, err := scheduler.scheduler.NewJob(
+		gocron.CronJob(
+			// standard cron tab parsing
+			cronTab,
+			false,
+		),
+		gocron.NewTask(
+			func() {}, // speed test
+		),
+	)
+	if err != nil {
+		log.Println(err)
+	}
+
+	fmt.Println(cronJob.ID())
+	log.Printf("Cron Job created: %s\n", cronJob.ID())
+	scheduler.scheduler.Start()
+}
 
 func RunScheduler() {
 	// create a scheduler
@@ -14,7 +56,7 @@ func RunScheduler() {
 	// defer func() { _ = s.Shutdown() }()
 	// defer s.Shutdown()
 	if err != nil {
-		// handle error
+		log.Println(err)
 	}
 
 	// add a job to the scheduler
@@ -34,31 +76,35 @@ func RunScheduler() {
 		),
 	)
 	if err != nil {
-		// handle error
+		log.Println(err)
 	}
 	// each job has a unique id
 	fmt.Println(j.ID())
 
-	_, _ = s.NewJob(
+	_, err = s.NewJob(
 		gocron.CronJob(
 			// standard cron tab parsing
-			"1 * * * *",
+			os.Getenv("SCHEDULE_CRON"),
 			false,
 		),
 		gocron.NewTask(
-			func() {},
+			func() {}, // speed test
 		),
 	)
-	_, _ = s.NewJob(
-		gocron.CronJob(
-			// optionally include seconds as the first field
-			"* 1 * * * *",
-			true,
-		),
-		gocron.NewTask(
-			func() {},
-		),
-	)
+	// _, _ = s.NewJob(
+	// 	gocron.CronJob(
+	// 		// optionally include seconds as the first field
+	// 		"* 1 * * * *",
+	// 		true,
+	// 	),
+	// 	gocron.NewTask(
+	// 		func() {},
+	// 	),
+	// )
+	if err != nil {
+		// handle error
+		log.Println(err)
+	}
 
 	// start the scheduler
 	s.Start()
