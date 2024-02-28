@@ -61,7 +61,6 @@ func (scheduler SpeedtestScheduler) RunScheduler() {
 		log.Println(err)
 	}
 
-	fmt.Println(cronJob.ID())
 	log.Printf("Cron Job created: %s\n", cronJob.ID())
 	scheduler.scheduler.Start()
 }

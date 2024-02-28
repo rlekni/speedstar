@@ -35,11 +35,18 @@ func NewSpeedtestRepository(client influxdb2.Client) ISpeedtestRepository {
 func (repo SpeedtestRepository) SaveSpeedtestResults(result types.SpeedtestResult) {
 	// Get non-blocking write client
 	writeAPI := repo.client.WriteAPI(dbOrg, dbBucket)
-	// Create point using fluent style
-	point := influxdb2.NewPointWithMeasurement("stat").
-		AddTag("unit", "temperature").
-		AddField("avg", 23.2).
-		AddField("max", 45.0).
+
+	point := influxdb2.NewPointWithMeasurement("speed").
+		AddTag("key", "value").
+		AddField("isp", result.Isp).
+		AddField("server", result.Server).
+		AddField("latitude", result.Latitude).
+		AddField("longitude", result.Longitude).
+		AddField("distance", result.Distance).
+		AddField("latency", result.Latency).
+		AddField("jitter", result.Jitter).
+		AddField("download", result.Download).
+		AddField("upload", result.Upload).
 		SetTime(time.Now())
 
 	// write asynchronously
