@@ -42,12 +42,20 @@ func (service SpeedtestService) RunSpeedtest() {
 		server.UploadTest()
 		log.Printf("Server: %s; Latency: %s, Download: %f, Upload: %f\n", server.Name, server.Latency, server.DLSpeed, server.ULSpeed)
 
+		result := types.SpeedtestResult{
+			Isp:       user.Isp,
+			Server:    server.Name,
+			Latitude:  server.Lat,
+			Longitude: server.Lon,
+			Distance:  server.Distance,
+			Latency:   server.Latency.Milliseconds(),
+			Jitter:    server.Jitter.Milliseconds(),
+			Download:  server.DLSpeed,
+			Upload:    server.ULSpeed,
+		}
+		service.repository.SaveSpeedtestResults(result)
 		server.Context.Reset() // reset counter
 	}
-}
-
-func (service SpeedtestService) SaveTestResults(results types.SpeedtestResult) {
-	service.repository.SaveSpeedtestResults(results)
 }
 
 func TestSpeed() {
