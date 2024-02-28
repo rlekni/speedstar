@@ -32,11 +32,11 @@ func (repo SpeedtestRepository) SaveSpeedtestResults(result types.SpeedtestResul
 	writeAPI := repo.client.WriteAPI(dbOrg, dbBucket)
 
 	point := influxdb2.NewPointWithMeasurement("speed").
-		AddTag("key", "value").
-		AddField("isp", result.Isp).
-		AddField("server", result.Server).
-		AddField("latitude", result.Latitude).
-		AddField("longitude", result.Longitude).
+		AddTag("server", result.Server).
+		// AddField("isp", result.Isp).
+		// AddField("server", result.Server).
+		// AddField("latitude", result.Latitude).
+		// AddField("longitude", result.Longitude).
 		AddField("distance", result.Distance).
 		AddField("latency", result.Latency).
 		AddField("jitter", result.Jitter).

@@ -40,6 +40,7 @@ func (service SpeedtestService) RunSpeedtest() {
 		server.DownloadTest()
 		server.UploadTest()
 		log.Printf("Server: %s; Latency: %s, Download: %f, Upload: %f\n", server.Name, server.Latency, server.DLSpeed, server.ULSpeed)
+		log.Printf("Jitter: %s\n", server.Jitter)
 
 		result := types.SpeedtestResult{
 			Isp:       user.Isp,
@@ -48,7 +49,7 @@ func (service SpeedtestService) RunSpeedtest() {
 			Longitude: server.Lon,
 			Distance:  server.Distance,
 			Latency:   server.Latency.Milliseconds(),
-			Jitter:    server.Jitter.Milliseconds(),
+			Jitter:    server.Jitter.Microseconds(),
 			Download:  server.DLSpeed,
 			Upload:    server.ULSpeed,
 		}
