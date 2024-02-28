@@ -1,11 +1,9 @@
 package services
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"speedstar/internal/db"
-	"time"
 
 	"github.com/go-co-op/gocron/v2"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -63,75 +61,4 @@ func (scheduler SpeedtestScheduler) RunScheduler() {
 
 	log.Printf("Cron Job created: %s\n", cronJob.ID())
 	scheduler.scheduler.Start()
-}
-
-func RunScheduler() {
-	// create a scheduler
-	s, err := gocron.NewScheduler()
-	// defer func() { _ = s.Shutdown() }()
-	// defer s.Shutdown()
-	if err != nil {
-		log.Println(err)
-	}
-
-	// add a job to the scheduler
-	j, err := s.NewJob(
-		gocron.DurationJob(
-			10*time.Second,
-		),
-		gocron.NewTask(
-			func(a string, b int) {
-				// do things
-				db.InfluxdbWrites()
-				db.InfluxdbWritesAsync()
-				fmt.Println("JOB RUN")
-			},
-			"hello",
-			1,
-		),
-	)
-	if err != nil {
-		log.Println(err)
-	}
-	// each job has a unique id
-	fmt.Println(j.ID())
-
-	_, err = s.NewJob(
-		gocron.CronJob(
-			// standard cron tab parsing
-			os.Getenv("SCHEDULE_CRON"),
-			false,
-		),
-		gocron.NewTask(
-			func() {}, // speed test
-		),
-	)
-	// _, _ = s.NewJob(
-	// 	gocron.CronJob(
-	// 		// optionally include seconds as the first field
-	// 		"* 1 * * * *",
-	// 		true,
-	// 	),
-	// 	gocron.NewTask(
-	// 		func() {},
-	// 	),
-	// )
-	if err != nil {
-		// handle error
-		log.Println(err)
-	}
-
-	// start the scheduler
-	s.Start()
-
-	// block until you are ready to shut down
-	// select {
-	// case <-time.After(time.Minute):
-	// }
-
-	// // when you're done, shut it down
-	// err = s.Shutdown()
-	// if err != nil {
-	// 	// handle error
-	// }
 }
