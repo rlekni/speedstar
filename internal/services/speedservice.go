@@ -7,22 +7,22 @@ import (
 	"github.com/showwin/speedtest-go/speedtest"
 )
 
-type ISpeedTestService interface {
+type ISpeedtestService interface {
 	RunSpeedtest()
 }
 
-type SpeedTestService struct {
+type SpeedtestService struct {
 	client *speedtest.Speedtest
 }
 
-func NewSpeedtestService() ISpeedTestService {
+func NewSpeedtestService() ISpeedtestService {
 	var speedtestClient = speedtest.New()
-	return &SpeedTestService{
+	return &SpeedtestService{
 		client: speedtestClient,
 	}
 }
 
-func (service SpeedTestService) RunSpeedtest() {
+func (service SpeedtestService) RunSpeedtest() {
 	user, _ := service.client.FetchUserInfo()
 	log.Printf("ISP %s\n", user.Isp)
 

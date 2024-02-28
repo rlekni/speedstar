@@ -10,25 +10,25 @@ import (
 	"github.com/go-co-op/gocron/v2"
 )
 
-type ISpeedTestScheduler interface {
+type ISpeedtestScheduler interface {
 	RunScheduler()
 }
 
-type SpeedTestScheduler struct {
+type SpeedtestScheduler struct {
 	scheduler gocron.Scheduler
 }
 
-func NewScheduler() ISpeedTestScheduler {
+func NewScheduler() ISpeedtestScheduler {
 	scheduler, err := gocron.NewScheduler()
 	if err != nil {
 		log.Println(err)
 	}
-	return &SpeedTestScheduler{
+	return &SpeedtestScheduler{
 		scheduler: scheduler,
 	}
 }
 
-func (scheduler SpeedTestScheduler) RunScheduler() {
+func (scheduler SpeedtestScheduler) RunScheduler() {
 	cronTab := os.Getenv("SCHEDULE_CRON")
 	log.Printf("Cron: %s\n", cronTab)
 	cronJob, err := scheduler.scheduler.NewJob(

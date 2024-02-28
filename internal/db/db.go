@@ -10,6 +10,9 @@ import (
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 )
 
+type ISpeedtestRepository interface {
+}
+
 var (
 	dbUrl    = os.Getenv("INFLUXDB_URL")
 	dbToken  = os.Getenv("INFLUXDB_TOKEN")
